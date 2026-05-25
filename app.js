@@ -8,8 +8,8 @@ const DEFAULT_STATE = {
     theme: "dark",
     screens: [
         { id: 1, url: "https://www.wikipedia.org", label: "Wikipedia" },
-        { id: 2, url: "https://www.openstreetmap.org", label: "OpenStreetMap" },
-        { id: 3, url: "https://picsum.photos/v2/list", label: "Image Feed" },
+        { id: 2, url: "https://github.com/Vijay11-08", label: "GitHub" },
+        { id: 3, url: "https://www.youtube.com/embed/dQw4w9WgXcQ", label: "YouTube" },
         { id: 4, url: "", label: "Empty Screen" }
     ]
 };
@@ -24,6 +24,100 @@ const IFRAME_BUST_DOMAINS = [
     'netflix.com', 'linkedin.com', 'reddit.com', 'apple.com', 'microsoft.com',
     'yahoo.com', 'bing.com', 'duckduckgo.com', 'github.io'
 ];
+
+// Rich site metadata for branded preview cards on blocked domains
+const SITE_META = {
+    'github.com': {
+        name: 'GitHub',
+        icon: 'https://github.githubassets.com/favicons/favicon-dark.svg',
+        color: '#238636',
+        gradient: 'linear-gradient(135deg, #0d1117 0%, #161b22 50%, #238636 150%)',
+        desc: 'GitHub blocks iframe embedding for security. Use the buttons below to view this page.',
+        iconFallback: '🐙'
+    },
+    'youtube.com': {
+        name: 'YouTube',
+        icon: 'https://www.youtube.com/s/desktop/favicon_144x144.png',
+        color: '#FF0000',
+        gradient: 'linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #FF0000 150%)',
+        desc: 'Tip: Paste a video link and it will auto-convert to an embeddable player!',
+        iconFallback: '▶️'
+    },
+    'google.com': {
+        name: 'Google',
+        icon: 'https://www.google.com/favicon.ico',
+        color: '#4285F4',
+        gradient: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #4285F4 150%)',
+        desc: 'Google does not allow iframe embedding. Open in a new tab or popup instead.',
+        iconFallback: '🔍'
+    },
+    'reddit.com': {
+        name: 'Reddit',
+        icon: 'https://www.redditstatic.com/shreddit/assets/favicon/64x64.png',
+        color: '#FF4500',
+        gradient: 'linear-gradient(135deg, #1a1a2e 0%, #0e1113 50%, #FF4500 150%)',
+        desc: 'Reddit blocks iframe embedding. Use the actions below to open this page.',
+        iconFallback: '🤖'
+    },
+    'linkedin.com': {
+        name: 'LinkedIn',
+        icon: 'https://static.licdn.com/aero-v1/sc/h/aahlc7dl5iqo46789phkgnn0e',
+        color: '#0A66C2',
+        gradient: 'linear-gradient(135deg, #1a1a2e 0%, #0a1628 50%, #0A66C2 150%)',
+        desc: 'LinkedIn prevents iframe embedding for security reasons.',
+        iconFallback: '💼'
+    },
+    'twitter.com': {
+        name: 'X (Twitter)',
+        icon: 'https://abs.twimg.com/favicons/twitter.3.ico',
+        color: '#1DA1F2',
+        gradient: 'linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #1DA1F2 150%)',
+        desc: 'X/Twitter blocks iframe embedding. Open in a new window instead.',
+        iconFallback: '𝕏'
+    },
+    'x.com': {
+        name: 'X (Twitter)',
+        icon: 'https://abs.twimg.com/favicons/twitter.3.ico',
+        color: '#1DA1F2',
+        gradient: 'linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #1DA1F2 150%)',
+        desc: 'X/Twitter blocks iframe embedding. Open in a new window instead.',
+        iconFallback: '𝕏'
+    }
+};
+
+// Get rich metadata for a blocked domain
+function getSiteMeta(url) {
+    if (!url) return null;
+    try {
+        const hostname = new URL(url).hostname.toLowerCase();
+        for (const [domain, meta] of Object.entries(SITE_META)) {
+            if (hostname.includes(domain)) return meta;
+        }
+    } catch(e) {}
+    return null;
+}
+
+// Extract GitHub repo info from URL
+function getGitHubInfo(url) {
+    if (!url) return null;
+    try {
+        const u = new URL(url);
+        const parts = u.pathname.split('/').filter(Boolean);
+        if (parts.length >= 2) {
+            return { user: parts[0], repo: parts[1], path: parts.slice(2).join('/') };
+        } else if (parts.length === 1) {
+            return { user: parts[0], repo: null, path: '' };
+        }
+    } catch(e) {}
+    return null;
+}
+
+// Extract YouTube video title hint from URL
+function getYouTubeVideoId(url) {
+    if (!url) return null;
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/embed\/)([^&\s?#]+)/);
+    return match ? match[1] : null;
+}
 
 // DOM Elements
 const sidebar = document.getElementById('sidebar');
@@ -139,13 +233,14 @@ function convertYoutubeUrl(url) {
 // Check if a URL will likely bust an iframe
 function isLikelyIframeBuster(url) {
     if (!url) return false;
-    // YouTube embed URLs are safe
+    // YouTube embed URLs are perfectly safe for iframes
     if (url.toLowerCase().includes('youtube.com/embed/')) return false;
+    // YouTube nocookie embed URLs are also safe
+    if (url.toLowerCase().includes('youtube-nocookie.com/embed/')) return false;
     try {
         const domain = new URL(url).hostname.toLowerCase();
         return IFRAME_BUST_DOMAINS.some(d => domain.includes(d));
     } catch (e) {
-        // Fallback simple string check if URL parser fails
         const lowerUrl = url.toLowerCase();
         return IFRAME_BUST_DOMAINS.some(d => lowerUrl.includes(d));
     }
@@ -269,6 +364,83 @@ function createScreenCard(screen, displayIndex) {
     const hasUrl = !!screen.url;
     const faviconSrc = hasUrl ? getFavicon(screen.url) : '';
     const isBuster = isLikelyIframeBuster(screen.url);
+    const siteMeta = isBuster ? getSiteMeta(screen.url) : null;
+    const ghInfo = (isBuster && screen.url && screen.url.includes('github.com')) ? getGitHubInfo(screen.url) : null;
+    const ytId = (isBuster && screen.url && (screen.url.includes('youtube.com') || screen.url.includes('youtu.be'))) ? getYouTubeVideoId(screen.url) : null;
+
+    // Build the blocked-site rich preview HTML
+    let blockedPreviewHTML = '';
+    const isGitHub = isBuster && screen.url && screen.url.includes('github.com') && ghInfo;
+
+    if (isGitHub) {
+        // GitHub gets a LIVE API-powered viewer instead of a static blocked message
+        blockedPreviewHTML = `
+            <div class="gh-live-viewer visible" id="gh-viewer-${screen.id}">
+                <div class="gh-viewer-loading">
+                    <div class="gh-skeleton-avatar"></div>
+                    <div class="gh-skeleton-line w60"></div>
+                    <div class="gh-skeleton-line w40"></div>
+                    <div class="gh-skeleton-line w80"></div>
+                </div>
+            </div>`;
+    } else if (isBuster && siteMeta) {
+        const siteIconHTML = `<img src="${siteMeta.icon}" class="rich-preview-icon" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="${siteMeta.name}">`;
+        const fallbackIconHTML = `<span class="rich-preview-icon-fallback" style="display:none;font-size:2rem">${siteMeta.iconFallback}</span>`;
+
+        let extraInfoHTML = '';
+        if (ytId) {
+            extraInfoHTML = `<div class="rich-preview-meta"><span class="rp-chip"><i data-lucide="play" style="width:12px;height:12px"></i> Video ID: ${ytId}</span><span class="rp-chip-hint">Paste the link again — it will auto-embed!</span></div>`;
+        }
+
+        blockedPreviewHTML = `
+            <div class="rich-blocked-preview visible" style="--site-color: ${siteMeta.color}; background: ${siteMeta.gradient}">
+                <div class="rbp-glow" style="background: ${siteMeta.color}"></div>
+                <div class="rbp-content">
+                    <div class="rbp-icon-area">
+                        ${siteIconHTML}
+                        ${fallbackIconHTML}
+                    </div>
+                    <h3 class="rbp-title">${siteMeta.name}</h3>
+                    <p class="rbp-url">${screen.url}</p>
+                    <p class="rbp-desc">${siteMeta.desc}</p>
+                    ${extraInfoHTML}
+                    <div class="rbp-actions">
+                        <button class="btn btn-glow rbp-btn" onclick="openSinglePopup(${screen.id})">
+                            <i data-lucide="external-link"></i> Open Popup
+                        </button>
+                        <button class="btn btn-secondary rbp-btn" onclick="openDirect(${screen.id})">
+                            <i data-lucide="arrow-up-right"></i> New Tab
+                        </button>
+                    </div>
+                    <button class="btn btn-text-link rbp-help" onclick="openHelpModal()">
+                        <i data-lucide="info"></i> Why can't this load inline?
+                    </button>
+                </div>
+            </div>`;
+    } else if (isBuster) {
+        blockedPreviewHTML = `
+            <div class="rich-blocked-preview visible generic">
+                <div class="rbp-content">
+                    <div class="rbp-icon-area">
+                        <i data-lucide="shield-alert" style="width:40px;height:40px;color:var(--accent-warning)"></i>
+                    </div>
+                    <h3 class="rbp-title">Site Blocked Embedding</h3>
+                    <p class="rbp-url">${screen.url}</p>
+                    <p class="rbp-desc">This website prevents iframe embedding for security. Use the buttons below to view it.</p>
+                    <div class="rbp-actions">
+                        <button class="btn btn-glow rbp-btn" onclick="openSinglePopup(${screen.id})">
+                            <i data-lucide="external-link"></i> Open Popup
+                        </button>
+                        <button class="btn btn-secondary rbp-btn" onclick="openDirect(${screen.id})">
+                            <i data-lucide="arrow-up-right"></i> New Tab
+                        </button>
+                    </div>
+                    <button class="btn btn-text-link rbp-help" onclick="openHelpModal()">
+                        <i data-lucide="info"></i> Why can't this load inline?
+                    </button>
+                </div>
+            </div>`;
+    }
 
     card.innerHTML = `
         <div class="screen-header">
@@ -295,35 +467,25 @@ function createScreenCard(screen, displayIndex) {
             </div>
         </div>
         <div class="screen-body">
-            <!-- Iframe refuter notification -->
-            <div class="iframe-protection-warning ${isBuster ? 'visible' : ''}">
-                <i data-lucide="alert-triangle" class="warning-icon"></i>
-                <h4>Connection Blocked by Site</h4>
-                <p>This site (${screen.label || 'this domain'}) prevents iframe embedding for security.</p>
-                <div class="warning-actions">
-                    <button class="btn btn-glow warning-action-btn" onclick="openSinglePopup(${screen.id})">
-                        <i data-lucide="external-link"></i> Launch Popup
-                    </button>
-                    <button class="btn btn-secondary warning-action-btn" onclick="openDirect(${screen.id})">
-                        <i data-lucide="arrow-up-right"></i> Open Tab
-                    </button>
-                </div>
-                <button class="btn btn-text-link" onclick="openHelpModal()">
-                    <i data-lucide="help-circle"></i> Why does this happen?
-                </button>
-            </div>
+            ${blockedPreviewHTML}
 
             <!-- Empty State Placeholder -->
             <div class="empty-placeholder" style="display: ${hasUrl ? 'none' : 'flex'}">
-                <i data-lucide="plus-circle"></i>
-                <h4>Empty Workspace Frame</h4>
-                <p>Enter a destination address to populate this active frame.</p>
-                <input type="text" placeholder="e.g. google.com or custom link" id="placeholder-input-${screen.id}" onkeydown="handlePlaceholderEnter(event, ${screen.id})">
-                <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 0.75rem;" onclick="loadPlaceholderUrl(${screen.id})">Load Site</button>
+                <div class="empty-placeholder-icon-wrap">
+                    <i data-lucide="monitor-plus"></i>
+                </div>
+                <h4>Add a Website</h4>
+                <p>Enter a URL to load a live website in this frame.</p>
+                <div class="empty-input-row">
+                    <input type="text" placeholder="e.g. wikipedia.org or paste any link" id="placeholder-input-${screen.id}" onkeydown="handlePlaceholderEnter(event, ${screen.id})">
+                    <button class="btn btn-primary empty-load-btn" onclick="loadPlaceholderUrl(${screen.id})">
+                        <i data-lucide="arrow-right" style="width:14px;height:14px"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Live Browser Viewport Frame -->
-            ${hasUrl ? `<iframe src="${screen.url}" id="iframe-${screen.id}" allow="autoplay; encrypted-media; picture-in-picture" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"></iframe>` : ''}
+            ${(hasUrl && !isBuster) ? `<iframe src="${screen.url}" id="iframe-${screen.id}" allow="autoplay; encrypted-media; picture-in-picture" sandbox="allow-same-origin allow-scripts allow-popups allow-forms allow-presentation"></iframe>` : ''}
         </div>
     `;
 
