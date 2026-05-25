@@ -152,18 +152,20 @@ Or use VS Code Live Server for better development experience.
 
 # 👨‍💻 Developer
 
+# 👨‍💻 Developer
+
 <div align="center">
 
-<img src="https://avatars.githubusercontent.com/u/99184393?v=4" width="150" />
+<img src="https://media.licdn.com/dms/image/D4D03AQYOUR_IMAGE_LINK/profile-displayphoto-shrink_400_400/0/yourphoto.jpg" width="180" style="border-radius:50%; border:4px solid #00C2FF;" />
 
-## Vijay Otaradi
+# Vijay Otaradi
 
-💻 Web Developer • 📊 Data Science Enthusiast • 🚀 Frontend Creator
+### 💻 Full Stack Developer | 📊 Data Science Enthusiast | 🚀 Frontend Creator
 
 <br>
 
 <a href="https://github.com/Vijay11-08">
-<img src="https://img.shields.io/badge/GitHub-000?style=for-the-badge&logo=github" />
+<img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github" />
 </a>
 
 <a href="https://linkedin.com/in/vijay-otaradi-678427266">
