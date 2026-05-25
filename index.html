@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MultiScreen Studio | Dynamic Multi-Window Workspace</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Floating Gradient Orbs for Visual Premium Feel -->
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+
+        <!-- Sidebar / Settings Panel -->
+        <aside class="sidebar collapsed" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i data-lucide="layers"></i>
+                    </div>
+                    <div>
+                        <h2>MultiScreen</h2>
+                        <span>Workspace Studio</span>
+                    </div>
+                </div>
+                <button class="btn-icon toggle-sidebar-btn" id="collapseSidebarBtn" title="Collapse Sidebar">
+                    <i data-lucide="chevron-left"></i>
+                </button>
+            </div>
+
+            <div class="sidebar-content">
+                <!-- Workspace Presets Section -->
+                <div class="sidebar-section">
+                    <h3>Workspace Presets</h3>
+                    <div class="preset-grid">
+                        <button class="btn btn-secondary preset-btn" data-screens="1">1 Screen</button>
+                        <button class="btn btn-secondary preset-btn" data-screens="2">2 Split</button>
+                        <button class="btn btn-secondary preset-btn" data-screens="4">4 Grid (2x2)</button>
+                        <button class="btn btn-secondary preset-btn" data-screens="6">6 Grid</button>
+                        <button class="btn btn-secondary preset-btn" data-screens="9">9 Grid (3x3)</button>
+                        <button class="btn btn-secondary preset-btn" data-screens="12">12 Grid</button>
+                    </div>
+                </div>
+
+                <!-- Screen Count & Custom Grid Section -->
+                <div class="sidebar-section">
+                    <h3>Custom Layout</h3>
+                    <div class="form-group">
+                        <label for="screenCount">Number of Screens</label>
+                        <div class="input-with-buttons">
+                            <button class="btn-input-adj" id="decScreensBtn">-</button>
+                            <input type="number" id="screenCount" min="1" max="24" value="4">
+                            <button class="btn-input-adj" id="incScreensBtn">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="aspectRatio">Aspect Ratio Mode</label>
+                        <select id="aspectRatio">
+                            <option value="auto">Auto / Fill Space</option>
+                            <option value="16-9">16:9 Cinema</option>
+                            <option value="4-3">4:3 Standard</option>
+                            <option value="1-1">1:1 Square</option>
+                            <option value="9-16">9:16 Portrait</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="gridGap">Screen Spacing (Gap)</label>
+                        <div class="slider-container">
+                            <input type="range" id="gridGap" min="0" max="40" value="16">
+                            <span id="gridGapVal">16px</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- URL Bulk Manager Section -->
+                <div class="sidebar-section">
+                    <h3>Bulk URL Loader</h3>
+                    <p class="section-desc">Quickly configure all your screens at once.</p>
+                    <button class="btn btn-primary btn-block" id="openBulkModalBtn">
+                        <i data-lucide="text-cursor-input"></i> Bulk Paste URLs
+                    </button>
+                </div>
+
+                <!-- Pop-up Popup Matrix Engine Option -->
+                <div class="sidebar-section popup-matrix-section">
+                    <h3>Chrome Multi-Window Engine</h3>
+                    <p class="section-desc">Open configured links as perfectly arranged individual native windows. Bypasses all iframe blockages.</p>
+                    <button class="btn btn-glow btn-block" id="launchWindowsBtn">
+                        <i data-lucide="external-link"></i> Launch Multi-Windows
+                    </button>
+                </div>
+
+                <!-- Troubleshooting Info -->
+                <div class="sidebar-section help-section">
+                    <div class="help-box">
+                        <i data-lucide="help-circle"></i>
+                        <div>
+                            <h4>Some links not loading?</h4>
+                            <p>Websites like Google, YouTube, and GitHub refuse to be loaded inside standard web frames (iframe security).</p>
+                            <a href="#" id="openHelpModalBtn">See How to Fix</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer of Sidebar -->
+            <div class="sidebar-footer">
+                <button class="btn-icon-label" id="themeToggleBtn">
+                    <i data-lucide="sun"></i>
+                    <span>Light Mode</span>
+                </button>
+                <div class="version">v1.1 Premium</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-workspace">
+            <!-- Header Bar -->
+            <header class="workspace-header">
+                <div class="header-left">
+                    <button class="btn-icon toggle-sidebar-btn" id="expandSidebarBtn" title="Expand Settings">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <div class="header-title-area">
+                        <h1 id="workspaceTitle" contenteditable="true" spellcheck="false">My Active Workspace</h1>
+                        <p>Manage, monitor, and interact with multiple sites simultaneously.</p>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="quick-status">
+                        <span class="status-dot"></span>
+                        <span id="activeCount">4 Screens Running</span>
+                    </div>
+                    <div class="divider"></div>
+                    <button class="btn btn-secondary" id="reloadAllBtn" title="Reload All Screens">
+                        <i data-lucide="refresh-cw"></i> Reload All
+                    </button>
+                    <button class="btn btn-secondary" id="syncUrlBtn" title="Load single URL into all screens">
+                        <i data-lucide="link-2"></i> Sync URL
+                    </button>
+                    <button class="btn btn-icon-glass" id="fullscreenWorkspaceBtn" title="Fullscreen Workspace">
+                        <i data-lucide="maximize"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Grid Viewport -->
+            <section class="grid-viewport" id="gridViewport">
+                <!-- Screens will be generated here dynamically -->
+            </section>
+        </main>
+    </div>
+
+    <!-- MODAL: Bulk URL Paste -->
+    <div class="modal-overlay" id="bulkModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i data-lucide="text-cursor-input"></i>
+                    <h3>Bulk URL Importer</h3>
+                </div>
+                <button class="btn-icon close-modal-btn" data-modal="bulkModal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Paste your URLs below. Put each URL on a new line. Empty lines will load default empty browser frames.</p>
+                <textarea id="bulkUrlsInput" placeholder="https://example.com&#10;https://wikipedia.org&#10;https://weather.com" rows="8"></textarea>
+                <div class="bulk-options">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="bulkAutoHttps" checked>
+                        <span class="checkmark"></span>
+                        Auto-prepend "https://" if missing
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal-btn" data-modal="bulkModal">Cancel</button>
+                <button class="btn btn-primary" id="applyBulkUrlsBtn">Apply to Screens</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Iframe Troubleshooting & Help -->
+    <div class="modal-overlay" id="helpModal">
+        <div class="modal modal-large">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i data-lucide="help-circle"></i>
+                    <h3>Why do some websites show "Refused to connect"?</h3>
+                </div>
+                <button class="btn-icon close-modal-btn" data-modal="helpModal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-box warning">
+                    <i data-lucide="alert-triangle"></i>
+                    <div>
+                        <strong>Security Protection (X-Frame-Options)</strong>
+                        <p>Websites like Google, GitHub, YouTube, and Amazon prevent themselves from being loaded inside of an <code>&lt;iframe&gt;</code> on other domains. This protects users from clickjacking attacks, but blocks layout builders like this one.</p>
+                    </div>
+                </div>
+
+                <div class="help-methods">
+                    <div class="help-method-card">
+                        <div class="method-num">1</div>
+                        <h4>Install a Chrome Header Modifier (Recommended)</h4>
+                        <p>You can bypass standard iframe restrictions on local dashboards by installing a browser extension that ignores the <code>X-Frame-Options</code> and <code>Content-Security-Policy</code> headers.</p>
+                        <div class="extension-suggestions">
+                            <h5>Popular Free Options:</h5>
+                            <ul>
+                                <li><strong>Ignore X-Frame-Options</strong> (Bypasses security headers for standard local tasks)</li>
+                                <li><strong>Allow CORS: Access-Control-Allow-Origin</strong> (Bypasses CORS restrictions)</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="help-method-card">
+                        <div class="method-num">2</div>
+                        <h4>Use the Chrome Multi-Window Engine</h4>
+                        <p>Instead of displaying the pages inside this grid, use our <strong>Chrome Multi-Window Engine</strong> (located in the sidebar). It will launch genuine, isolated Chrome windows arranged neatly across your monitors, completely bypassing all embedding issues.</p>
+                    </div>
+
+                    <div class="help-method-card">
+                        <div class="method-num">3</div>
+                        <h4>Use Embeddable Variants</h4>
+                        <p>Many sites offer custom embed pages. For example, instead of loading a YouTube video page, use the YouTube embed link: <code>https://www.youtube.com/embed/VIDEO_ID</code>.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary close-modal-btn" data-modal="helpModal">Got it, thanks!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: Sync URL Prompt -->
+    <div class="modal-overlay" id="syncModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i data-lucide="link-2"></i>
+                    <h3>Sync URL Across Screens</h3>
+                </div>
+                <button class="btn-icon close-modal-btn" data-modal="syncModal">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Enter a URL to load into <strong>every single active screen slot</strong> simultaneously:</p>
+                <div class="form-group">
+                    <input type="text" id="syncUrlInput" placeholder="https://example.com" class="text-input-field">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary close-modal-btn" data-modal="syncModal">Cancel</button>
+                <button class="btn btn-primary" id="applySyncUrlBtn">Sync Workspace</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic Controller Script -->
+    <script src="app.js"></script>
+</body>
+</html>
