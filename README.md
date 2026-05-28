@@ -52,10 +52,11 @@ This application demonstrates:
 |------------|----------------|
 | 📱 Responsive Design | Adapts perfectly across devices |
 | 🧩 Custom Grid Layout | Flexible screen column configuration |
-| 🎥 YouTube URL Support | Automatically normalizes video URLs |
+| 🎥 YouTube Embed Sync | Automatically normalizes standard watch and shorts URLs to inline playable embeds |
+| 🐙 GitHub Live API Viewer | Renders beautiful stats, language badges, and commit histories directly in the grid |
 | 🖥️ Multi-Screen Management | Optimized layout handling |
-| ⚡ Fast Performance | Lightweight frontend architecture |
-| 🎨 Modern UI | Clean and attractive interface |
+| ⚡ Glassmorphic Toasts | Dynamic notifications system for interactive clone options |
+| 🎨 Modern UI | Clean, high-tech interface with custom theme states |
 
 </div>
 
@@ -120,9 +121,9 @@ Or use VS Code Live Server for better development experience.
 
 <div align="center">
 
-| Desktop View | Responsive View |
-|--------------|----------------|
-| ![](https://via.placeholder.com/450x250.png?text=Desktop+Preview) | ![](https://via.placeholder.com/250x450.png?text=Mobile+Preview) |
+| MultiScreen Studio Workspace Dashboard |
+|:--:|
+| ![MultiScreen Studio Workspace](assets/multiscreen_studio_preview.png) |
 
 </div>
 

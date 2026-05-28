@@ -1318,3 +1318,562 @@ textarea:focus {
         justify-content: space-between;
     }
 }
+
+/* ==========================================================================
+   GitHub Live-Viewer Premium Interface Styles
+   ========================================================================== */
+
+.gh-live-viewer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+    z-index: 3;
+    overflow-y: auto;
+    display: none;
+    padding: 16px;
+    font-family: var(--font-body);
+}
+
+.gh-live-viewer.visible {
+    display: block;
+}
+
+/* Loading Skeleton Shimmer Animations */
+.gh-viewer-loading {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    height: 100%;
+    justify-content: center;
+}
+
+.gh-skeleton-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite linear;
+}
+
+.gh-skeleton-line {
+    height: 12px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #1f2937 25%, #374151 50%, #1f2937 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite linear;
+}
+
+.gh-skeleton-line.w80 { width: 80%; }
+.gh-skeleton-line.w60 { width: 60%; }
+.gh-skeleton-line.w40 { width: 40%; }
+
+@keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* GitHub Live Viewer Card Layout */
+.gh-live-viewer-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 14px;
+    color: #adbac7;
+}
+
+.gh-live-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid rgba(240, 246, 252, 0.1);
+    padding-bottom: 12px;
+}
+
+.gh-owner-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid rgba(240, 246, 252, 0.15);
+}
+
+.gh-repo-names {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.gh-user-link, .gh-repo-link {
+    color: #539bf5;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gh-user-link:hover, .gh-repo-link:hover {
+    text-decoration: underline;
+}
+
+.gh-slash {
+    color: #768390;
+}
+
+.gh-public-badge {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    border: 1px solid rgba(240, 246, 252, 0.1);
+    color: #768390;
+    font-weight: 500;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+/* Stats Cards Grid */
+.gh-repo-desc {
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: #cdd9e5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin: 0;
+}
+
+.gh-repo-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.gh-stat-item {
+    background: rgba(22, 27, 34, 0.8);
+    border: 1px solid rgba(240, 246, 252, 0.1);
+    border-radius: 8px;
+    padding: 8px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: all var(--transition-fast);
+}
+
+.gh-stat-item:hover {
+    background: rgba(34, 39, 46, 0.9);
+    border-color: rgba(240, 246, 252, 0.2);
+    transform: translateY(-1px);
+}
+
+.gh-stat-item i {
+    width: 14px;
+    height: 14px;
+    color: #768390;
+}
+
+.gh-stat-item span {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #cdd9e5;
+}
+
+.gh-repo-details {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.72rem;
+    color: #768390;
+}
+
+.gh-lang {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.gh-lang-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.gh-updated {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.gh-updated i {
+    width: 12px;
+    height: 12px;
+}
+
+/* Commits / Activity Sections */
+.gh-activity-section, .gh-user-repos-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+}
+
+.gh-activity-section h4, .gh-user-repos-section h4 {
+    font-family: var(--font-heading);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #adbac7;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.gh-activity-section h4 i, .gh-user-repos-section h4 i {
+    width: 14px;
+    height: 14px;
+    color: var(--accent-secondary);
+}
+
+.gh-commits-list {
+    list-style: none;
+    overflow-y: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 4px;
+}
+
+.gh-commits-list::-webkit-scrollbar {
+    width: 4px;
+}
+.gh-commits-list::-webkit-scrollbar-thumb {
+    background: rgba(240, 246, 252, 0.1);
+    border-radius: 2px;
+}
+
+.gh-commit-item {
+    background: rgba(22, 27, 34, 0.5);
+    border: 1px solid rgba(240, 246, 252, 0.05);
+    border-radius: 6px;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.gh-commit-msg {
+    font-size: 0.72rem;
+    color: #cdd9e5;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.gh-commit-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: #768390;
+}
+
+.gh-commit-sha {
+    font-family: monospace;
+    color: #539bf5;
+}
+
+/* User Card Specific Styling */
+.gh-user-card {
+    position: relative;
+    height: 100%;
+}
+
+.gh-user-banner {
+    height: 50px;
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    margin-top: -16px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.gh-user-info-area {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-top: -24px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(240, 246, 252, 0.08);
+}
+
+.gh-user-avatar-large {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 3px solid #0d1117;
+    background: #161b22;
+    object-fit: cover;
+    box-shadow: var(--shadow-sm);
+    flex-shrink: 0;
+}
+
+.gh-user-header-text {
+    min-width: 0;
+}
+
+.gh-user-header-text h3 {
+    font-family: var(--font-heading);
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #cdd9e5;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gh-user-header-text p {
+    font-size: 0.72rem;
+    color: #768390;
+    margin: 0;
+}
+
+.gh-user-bio {
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: #adbac7;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.gh-user-meta-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-size: 0.7rem;
+    color: #768390;
+}
+
+.gh-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.gh-meta-item i {
+    width: 12px;
+    height: 12px;
+}
+
+.gh-meta-item .gh-link-text {
+    color: #539bf5;
+    cursor: pointer;
+}
+.gh-meta-item .gh-link-text:hover {
+    text-decoration: underline;
+}
+
+.gh-user-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: rgba(22, 27, 34, 0.6);
+    border: 1px solid rgba(240, 246, 252, 0.08);
+    border-radius: 8px;
+    padding: 8px;
+    text-align: center;
+}
+
+.gh-user-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.gh-stat-num {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #cdd9e5;
+}
+
+.gh-stat-label {
+    font-size: 0.62rem;
+    color: #768390;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.gh-user-repos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.gh-user-repos-grid::-webkit-scrollbar {
+    width: 4px;
+}
+.gh-user-repos-grid::-webkit-scrollbar-thumb {
+    background: rgba(240, 246, 252, 0.1);
+    border-radius: 2px;
+}
+
+.gh-user-repo-card {
+    background: rgba(22, 27, 34, 0.5);
+    border: 1px solid rgba(240, 246, 252, 0.06);
+    border-radius: 6px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 4px;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.gh-user-repo-card:hover {
+    background: rgba(34, 39, 46, 0.8);
+    border-color: rgba(240, 246, 252, 0.15);
+}
+
+.gh-user-repo-name {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #539bf5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+}
+
+.gh-user-repo-stars {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.65rem;
+    color: #768390;
+}
+.gh-user-repo-stars i {
+    width: 10px;
+    height: 10px;
+}
+
+/* Card Universal Footer layout */
+.gh-card-footer {
+    display: flex;
+    gap: 6px;
+    border-top: 1px solid rgba(240, 246, 252, 0.08);
+    padding-top: 12px;
+    margin-top: auto;
+}
+
+.gh-card-footer .btn-sm {
+    padding: 6px 10px;
+    font-size: 0.72rem;
+    flex: 1;
+    border-radius: 6px;
+}
+
+.gh-card-footer .btn-sm i {
+    width: 12px;
+    height: 12px;
+}
+
+/* Offline Banner Mode */
+.gh-mode-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    font-size: 0.6rem;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    color: var(--accent-warning);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+/* Light Theme overrides for GitHub API card */
+.light-theme .gh-live-viewer {
+    background: linear-gradient(135deg, #f6f8fa 0%, #ffffff 100%);
+}
+.light-theme .gh-live-viewer-card {
+    color: #57606a;
+}
+.light-theme .gh-live-header {
+    border-bottom: 1px solid #d0d7de;
+}
+.light-theme .gh-public-badge {
+    border-color: #d0d7de;
+    color: #57606a;
+}
+.light-theme .gh-repo-desc {
+    color: #24292f;
+}
+.light-theme .gh-stat-item {
+    background: #f6f8fa;
+    border-color: #d0d7de;
+}
+.light-theme .gh-stat-item:hover {
+    background: #eaeef2;
+    border-color: #afb8c1;
+}
+.light-theme .gh-stat-item span {
+    color: #24292f;
+}
+.light-theme .gh-commit-item {
+    background: #f6f8fa;
+    border-color: #e1e4e8;
+}
+.light-theme .gh-commit-msg {
+    color: #24292f;
+}
+.light-theme .gh-user-info-area {
+    border-bottom-color: #d0d7de;
+}
+.light-theme .gh-user-avatar-large {
+    border-color: #ffffff;
+    background: #f6f8fa;
+}
+.light-theme .gh-user-header-text h3 {
+    color: #24292f;
+}
+.light-theme .gh-user-bio {
+    color: #24292f;
+}
+.light-theme .gh-user-stats-grid {
+    background: #f6f8fa;
+    border-color: #d0d7de;
+}
+.light-theme .gh-stat-num {
+    color: #24292f;
+}
+.light-theme .gh-user-repo-card {
+    background: #f6f8fa;
+    border-color: #d0d7de;
+}
+.light-theme .gh-user-repo-card:hover {
+    background: #eaeef2;
+    border-color: #afb8c1;
+}
+.light-theme .gh-card-footer {
+    border-top-color: #d0d7de;
+}
+

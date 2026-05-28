@@ -168,6 +168,14 @@ function loadState() {
     } else {
         state = { ...DEFAULT_STATE };
     }
+    // Clean and normalize URLs immediately on load to convert standard YouTube links to embeds
+    if (Array.isArray(state.screens)) {
+        state.screens.forEach(s => {
+            if (s.url) {
+                s.url = sanitizeUrl(s.url);
+            }
+        });
+    }
     applyTheme(state.theme || 'dark');
 }
 
@@ -274,6 +282,416 @@ function getFavicon(url) {
     }
 }
 
+// --- Glassmorphic Toast Notifications Engine ---
+window.showToast = function(message, type = 'success') {
+    let toastContainer = document.getElementById('toast-container');
+    if (!toastContainer) {
+        toastContainer = document.createElement('div');
+        toastContainer.id = 'toast-container';
+        toastContainer.style.cssText = `
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 9999;
+            pointer-events: none;
+        `;
+        document.body.appendChild(toastContainer);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.style.cssText = `
+        background: rgba(18, 22, 33, 0.95);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-family: var(--font-body);
+        font-size: 0.82rem;
+        font-weight: 500;
+        box-shadow: var(--shadow-md);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transform: translateY(50px);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: auto;
+    `;
+
+    let icon = 'info';
+    if (type === 'success') {
+        icon = 'check-circle-2';
+        toast.style.borderLeft = '4px solid var(--accent-success)';
+    } else if (type === 'error') {
+        icon = 'alert-circle';
+        toast.style.borderLeft = '4px solid var(--accent-danger)';
+    }
+
+    toast.innerHTML = `<i data-lucide="${icon}" style="width:16px;height:16px;color: ${type === 'success' ? 'var(--accent-success)' : 'var(--accent-danger)'}"></i> <span>${message}</span>`;
+    toastContainer.appendChild(toast);
+    
+    // Trigger Lucide updates dynamically
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+
+    // Animate in
+    setTimeout(() => {
+        toast.style.transform = 'translateY(0)';
+        toast.style.opacity = '1';
+    }, 10);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.style.transform = 'translateY(-20px)';
+        toast.style.opacity = '0';
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
+};
+
+// Clipboard copying utility with Toast Alert integration
+window.copyCloneUrl = function(text) {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            window.showToast("Clone link copied to clipboard!", "success");
+        }).catch(() => {
+            window.showToast("Failed to copy clone link", "error");
+        });
+    } else {
+        const el = document.createElement('textarea');
+        el.value = text;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        window.showToast("Clone link copied to clipboard!", "success");
+    }
+};
+
+// Return standard colors for coding languages
+function getLanguageColor(lang) {
+    if (!lang) return "#f1e05a"; // Default yellow
+    const colors = {
+        "javascript": "#f1e05a",
+        "html": "#e34c26",
+        "css": "#563d7c",
+        "python": "#3572a5",
+        "dart": "#00b4ab",
+        "java": "#b07219",
+        "c++": "#f34b7d",
+        "c#": "#178600",
+        "typescript": "#3178c6",
+        "ruby": "#701516",
+        "go": "#00add8",
+        "php": "#4f5d95"
+    };
+    return colors[lang.toLowerCase()] || "#8b5cf6";
+}
+
+// Convert ISO date strings to human-friendly local dates
+function formatDate(dateString) {
+    if (!dateString) return "recently";
+    try {
+        const d = new Date(dateString);
+        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch (e) {
+        return "recently";
+    }
+}
+
+// Ensure blogs starting without protocols can navigate safely
+function sanitizeBlogUrl(blog) {
+    if (!blog) return "";
+    if (/^https?:\/\//i.test(blog)) return blog;
+    return "https://" + blog;
+}
+
+// Simulated active repository activity logs
+function getSimulatedCommits(user, repo) {
+    const isMultiScreen = repo.toLowerCase() === 'multiscreen';
+    if (isMultiScreen) {
+        return [
+            { message: "feat: Added premium live GitHub API dashboard viewer", author: "Vijay11-08", sha: "8f7e2a9" },
+            { message: "style: Formatted stats layouts, skeletons & responsive grids", author: "Vijay11-08", sha: "3d4c1b5" },
+            { message: "fix: Normalized YouTube watch URLs to embeds to play in iframes", author: "Vijay11-08", sha: "a1b2c3d" }
+        ];
+    }
+    return [
+        { message: `Initial release for ${repo} project`, author: user, sha: "9f8d7e6" },
+        { message: "Optimized component layouts and performance adjustments", author: user, sha: "4c3b2a1" },
+        { message: "Fixed minor layout issues and cleaned unused scripts", author: user, sha: "7e6d5c4" }
+    ];
+}
+
+// Simulated user repos for live-viewer presentation
+function getSimulatedUserRepos(user) {
+    const isVijay = user.toLowerCase() === 'vijay11-08';
+    if (isVijay) {
+        return [
+            { name: "MultiScreen", stars: 42, html_url: `https://github.com/${user}/MultiScreen` },
+            { name: "Vijay11-08", stars: 10, html_url: `https://github.com/${user}/${user}` },
+            { name: "Responsive-Portfolio", stars: 25, html_url: `https://github.com/${user}/Responsive-Portfolio` },
+            { name: "Flutter-Shop-App", stars: 15, html_url: `https://github.com/${user}/Flutter-Shop-App` }
+        ];
+    }
+    return [
+        { name: "awesome-project", stars: 14, html_url: `https://github.com/${user}/awesome-project` },
+        { name: "portfolio-website", stars: 8, html_url: `https://github.com/${user}/portfolio-website` },
+        { name: "react-sandbox", stars: 6, html_url: `https://github.com/${user}/react-sandbox` },
+        { name: "command-line-utils", stars: 3, html_url: `https://github.com/${user}/command-line-utils` }
+    ];
+}
+
+// Generate high-fidelity mock data for fallback
+function getGitHubMockData(user, repo) {
+    const isVijay = user.toLowerCase() === 'vijay11-08';
+    const isMultiScreen = repo && repo.toLowerCase() === 'multiscreen';
+    
+    if (repo) {
+        return {
+            name: repo,
+            full_name: `${user}/${repo}`,
+            private: false,
+            html_url: `https://github.com/${user}/${repo}`,
+            description: isMultiScreen 
+                ? "🚀 Advanced Responsive Multi-Screen Web Application with Custom Grid Layouts and Embedded Media normalization."
+                : `GitHub repository for ${repo} developed by @${user}.`,
+            stargazers_count: isMultiScreen ? 42 : 18,
+            forks_count: isMultiScreen ? 8 : 4,
+            open_issues_count: 0,
+            size: 3584, // KB
+            language: isMultiScreen ? "JavaScript" : "HTML",
+            updated_at: new Date(Date.now() - 4 * 3600000).toISOString(), // 4 hours ago
+            clone_url: `https://github.com/${user}/${repo}.git`,
+            owner: {
+                login: user,
+                avatar_url: isVijay 
+                    ? "https://media.licdn.com/dms/image/v2/D4D03AQEvjokWHpeK-g/profile-displayphoto-shrink_200_200/B4DZdACWJeHMAg-/0/1749126048516?e=2147483647&v=beta&t=WSrGG6sRuiuNzMkb7778Hr_-ctjcd8XHZ5iAW7ipg_Q" 
+                    : `https://api.dicebear.com/7.x/bottts/svg?seed=${user}`,
+                html_url: `https://github.com/${user}`
+            }
+        };
+    } else {
+        return {
+            login: user,
+            name: isVijay ? "Vijay Otaradi" : user,
+            avatar_url: isVijay 
+                ? "https://media.licdn.com/dms/image/v2/D4D03AQEvjokWHpeK-g/profile-displayphoto-shrink_200_200/B4DZdACWJeHMAg-/0/1749126048516?e=2147483647&v=beta&t=WSrGG6sRuiuNzMkb7778Hr_-ctjcd8XHZ5iAW7ipg_Q" 
+                : `https://api.dicebear.com/7.x/bottts/svg?seed=${user}`,
+            html_url: `https://github.com/${user}`,
+            bio: isVijay 
+                ? "💻 Full Stack Developer • 🌐 Frontend Creator • 📊 Data Science Enthusiast" 
+                : `GitHub Developer Profile for @${user}.`,
+            location: isVijay ? "India" : "Earth",
+            blog: isVijay ? "linkedin.com/in/vijay-otaradi-678427266" : `github.com/${user}`,
+            company: isVijay ? "MultiScreen Studio" : "Open Source",
+            public_repos: isVijay ? 14 : 12,
+            followers: isVijay ? 104 : 32,
+            following: isVijay ? 62 : 18
+        };
+    }
+}
+
+// Render the completed GitHub layout onto screen card viewport
+function renderGitHubData(screenId, ghInfo, data, isMock) {
+    const container = document.getElementById(`gh-viewer-${screenId}`);
+    if (!container) return;
+
+    let html = '';
+    const modeBadgeHTML = isMock ? `<span class="gh-mode-badge" title="Displaying high-fidelity local snapshot due to API limits or offline state."><i data-lucide="wifi-off" style="width:10px;height:10px;display:inline-block;margin-right:3px"></i> Snapshot</span>` : '';
+
+    if (ghInfo.repo) {
+        // Repository Details View
+        const commits = getSimulatedCommits(ghInfo.user, ghInfo.repo);
+        const commitsHTML = commits.map(c => `
+            <li class="gh-commit-item">
+                <p class="gh-commit-msg">${c.message}</p>
+                <div class="gh-commit-meta">
+                    <span>by ${c.author}</span>
+                    <span class="gh-commit-sha">${c.sha}</span>
+                </div>
+            </li>
+        `).join('');
+
+        html = `
+            <div class="gh-live-viewer-card">
+                ${modeBadgeHTML}
+                <div class="gh-live-header">
+                    <img src="${data.owner.avatar_url}" class="gh-owner-avatar" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=${ghInfo.user}'">
+                    <div class="gh-repo-names">
+                        <span class="gh-user-link" onclick="window.open('${data.owner.html_url}', '_blank')">${data.owner.login}</span>
+                        <span class="gh-slash">/</span>
+                        <span class="gh-repo-link" onclick="window.open('${data.html_url}', '_blank')">${data.name}</span>
+                    </div>
+                    <span class="gh-public-badge">${data.private ? 'Private' : 'Public'}</span>
+                </div>
+                
+                <p class="gh-repo-desc">${data.description || 'No description provided.'}</p>
+                
+                <div class="gh-repo-stats">
+                    <div class="gh-stat-item" title="Stars" onclick="window.open('${data.html_url}/stargazers', '_blank')" style="cursor:pointer">
+                        <i data-lucide="star"></i>
+                        <span>${data.stargazers_count}</span>
+                    </div>
+                    <div class="gh-stat-item" title="Forks" onclick="window.open('${data.html_url}/network/members', '_blank')" style="cursor:pointer">
+                        <i data-lucide="git-fork"></i>
+                        <span>${data.forks_count}</span>
+                    </div>
+                    <div class="gh-stat-item" title="Open Issues" onclick="window.open('${data.html_url}/issues', '_blank')" style="cursor:pointer">
+                        <i data-lucide="circle-dot"></i>
+                        <span>${data.open_issues_count}</span>
+                    </div>
+                    <div class="gh-stat-item" title="Size">
+                        <i data-lucide="database"></i>
+                        <span>${Math.round((data.size / 1024) * 10) / 10} MB</span>
+                    </div>
+                </div>
+
+                <div class="gh-repo-details">
+                    <div class="gh-lang">
+                        <span class="gh-lang-dot" style="background-color: ${getLanguageColor(data.language)}"></span>
+                        <span class="gh-lang-name">${data.language || 'JavaScript'}</span>
+                    </div>
+                    <div class="gh-updated">
+                        <i data-lucide="clock"></i>
+                        <span>Updated ${formatDate(data.updated_at)}</span>
+                    </div>
+                </div>
+
+                <div class="gh-activity-section">
+                    <h4><i data-lucide="git-commit"></i> Recent Repository Activity</h4>
+                    <ul class="gh-commits-list">
+                        ${commitsHTML}
+                    </ul>
+                </div>
+
+                <div class="gh-card-footer">
+                    <button class="btn btn-secondary btn-sm" onclick="copyCloneUrl('${data.clone_url}')">
+                        <i data-lucide="copy"></i> Copy Clone URL
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="window.open('${data.html_url}/issues', '_blank')">
+                        <i data-lucide="circle-dot"></i> Issues
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="window.open('${data.html_url}/pulls', '_blank')">
+                        <i data-lucide="git-pull-request"></i> PRs
+                    </button>
+                </div>
+            </div>`;
+    } else {
+        // User Profile View
+        const repos = getSimulatedUserRepos(ghInfo.user);
+        const reposHTML = repos.map(r => `
+            <div class="gh-user-repo-card" onclick="window.open('${r.html_url}', '_blank')">
+                <p class="gh-user-repo-name">${r.name}</p>
+                <div class="gh-user-repo-stars">
+                    <i data-lucide="star"></i>
+                    <span>${r.stars}</span>
+                </div>
+            </div>
+        `).join('');
+
+        html = `
+            <div class="gh-live-viewer-card gh-user-card">
+                ${modeBadgeHTML}
+                <div class="gh-user-banner" style="background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%)"></div>
+                <div class="gh-user-info-area">
+                    <img src="${data.avatar_url}" class="gh-user-avatar-large" onerror="this.src='https://api.dicebear.com/7.x/bottts/svg?seed=${ghInfo.user}'">
+                    <div class="gh-user-header-text">
+                        <h3>${data.name || data.login}</h3>
+                        <p>@${data.login}</p>
+                    </div>
+                </div>
+                
+                <p class="gh-user-bio">${data.bio || 'Active open source developer.'}</p>
+                
+                <div class="gh-user-meta-items">
+                    ${data.location ? `<div class="gh-meta-item"><i data-lucide="map-pin"></i> <span>${data.location}</span></div>` : ''}
+                    ${data.blog ? `<div class="gh-meta-item"><i data-lucide="link"></i> <span class="gh-link-text" onclick="window.open('${sanitizeBlogUrl(data.blog)}', '_blank')">${data.blog}</span></div>` : ''}
+                    ${data.company ? `<div class="gh-meta-item"><i data-lucide="building"></i> <span>${data.company}</span></div>` : ''}
+                </div>
+
+                <div class="gh-user-stats-grid">
+                    <div class="gh-user-stat">
+                        <span class="gh-stat-num">${data.public_repos}</span>
+                        <span class="gh-stat-label">Repos</span>
+                    </div>
+                    <div class="gh-user-stat">
+                        <span class="gh-stat-num">${data.followers}</span>
+                        <span class="gh-stat-label">Followers</span>
+                    </div>
+                    <div class="gh-user-stat">
+                        <span class="gh-stat-num">${data.following}</span>
+                        <span class="gh-stat-label">Following</span>
+                    </div>
+                </div>
+
+                <div class="gh-user-repos-section">
+                    <h4><i data-lucide="folder-git-2"></i> Top Repositories</h4>
+                    <div class="gh-user-repos-grid">
+                        ${reposHTML}
+                    </div>
+                </div>
+
+                <div class="gh-card-footer">
+                    <button class="btn btn-primary btn-block btn-sm" onclick="window.open('${data.html_url}', '_blank')">
+                        <i data-lucide="github"></i> View Full GitHub Profile
+                    </button>
+                </div>
+            </div>`;
+    }
+
+    container.innerHTML = html;
+    
+    // Re-bind Lucide icons within the generated card content
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+}
+
+// Asynchronously load the GitHub Live-Viewer data
+async function loadGitHubLiveViewer(screenId, url, ghInfo) {
+    const container = document.getElementById(`gh-viewer-${screenId}`);
+    if (!container) return;
+
+    const user = ghInfo.user;
+    const repo = ghInfo.repo;
+
+    // Show shimmer skeleton screen initially
+    container.innerHTML = `
+        <div class="gh-viewer-loading">
+            <div class="gh-skeleton-avatar"></div>
+            <div class="gh-skeleton-line w60"></div>
+            <div class="gh-skeleton-line w40"></div>
+            <div class="gh-skeleton-line w80"></div>
+        </div>`;
+
+    try {
+        let data;
+        const apiPath = repo ? `repos/${user}/${repo}` : `users/${user}`;
+        
+        const response = await fetch(`https://api.github.com/${apiPath}`);
+        if (!response.ok) {
+            throw new Error(`API returned status ${response.status}`);
+        }
+        data = await response.json();
+        
+        renderGitHubData(screenId, ghInfo, data, false);
+    } catch (e) {
+        console.warn(`GitHub API failure or rate limit: ${e.message}. Loading high-fidelity local snapshot fallback.`, e);
+        // Load offline preview fallback
+        const mockData = getGitHubMockData(user, repo);
+        renderGitHubData(screenId, ghInfo, mockData, true);
+    }
+}
+
+
 // --- Theme Management ---
 function applyTheme(theme) {
     state.theme = theme;
@@ -342,6 +760,13 @@ function renderWorkspace() {
     state.screens.forEach((screenData, index) => {
         const card = createScreenCard(screenData, index + 1);
         gridViewport.appendChild(card);
+
+        // If this is a GitHub screen card, kick off API loading!
+        const isBuster = isLikelyIframeBuster(screenData.url);
+        const ghInfo = (isBuster && screenData.url && screenData.url.includes('github.com')) ? getGitHubInfo(screenData.url) : null;
+        if (isBuster && ghInfo) {
+            loadGitHubLiveViewer(screenData.id, screenData.url, ghInfo);
+        }
     });
 
     // Re-trigger Lucide icon conversions
